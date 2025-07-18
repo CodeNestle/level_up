@@ -24,7 +24,7 @@ $stmt->close();
 
 $imgPath = $profile_img ? "images/$profile_img" : "images/default.png";
 
-// Fetch companies from DB
+// Fetch companies
 $companies = [];
 $result = $conn->query("SELECT id, name FROM companies");
 while ($row = $result->fetch_assoc()) {
@@ -36,41 +36,185 @@ while ($row = $result->fetch_assoc()) {
 <html>
 <head>
     <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" href="images/LuLogo.jpeg">
+
     <style>
-        body { font-family: sans-serif; background: #f2f6fc; padding: 40px; }
-        .header { display: flex; justify-content: space-between; align-items: center; }
-        .profile { display: flex; align-items: center; cursor: pointer; }
-        .profile img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; margin-right: 10px; }
-        .grid { margin-top: 40px; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
-        .card {
-            background-color: white; border-radius: 16px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            text-align: center; transition: transform 0.2s ease;
+        body {
+            font-family: sans-serif;
+            background: #f2f6fc;
+            margin: 0;
+            padding: 0;
         }
-        .card:hover { transform: scale(1.05); cursor: pointer; }
-        a { text-decoration: none; color: inherit; }
+
+        .navbar {
+            background: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .brand {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #2980b9;
+            font-weight: bold;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 8px;
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 5px;
+        }
+
+        .hamburger div {
+            width: 25px;
+            height: 3px;
+            background-color: #333;
+        }
+
+        .mobile-menu {
+            display: none;
+            flex-direction: column;
+            background: #fff;
+            position: absolute;
+            top: 65px;
+            right: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 15px;
+            border-radius: 10px;
+            width: 200px;
+        }
+
+        .mobile-menu a {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            text-decoration: none;
+            color: #2980b9;
+        }
+
+        .mobile-menu .profile {
+            margin-top: 10px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            .mobile-menu.show {
+                display: flex;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h2>👋 Welcome, <?php echo htmlspecialchars($username); ?></h2>
-        <a href="leaderboard.php" style="text-decoration:none; color:#2980b9;">🏆 View Leaderboard</a>
-        <a href="profile.php" class="profile-link">
-            <div class="profile">
-                <img src="<?php echo $imgPath; ?>" alt="Profile">
-                <span><?php echo htmlspecialchars($username); ?></span>
-            </div>
+
+<div class="navbar">
+    <div class="brand">📱 LevelUp</div>
+
+    <div class="nav-links">
+        <a href="leaderboard.php">🏆 Leaderboard</a>
+        <a href="profile.php" class="profile">
+            <img src="<?php echo $imgPath; ?>" alt="Profile">
+            <span><?php echo htmlspecialchars($username); ?></span>
         </a>
     </div>
 
+    <div class="hamburger" onclick="toggleMenu()">
+        <div></div><div></div><div></div>
+    </div>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="leaderboard.php">🏆 Leaderboard</a>
+        <a href="profile.php" class="profile">
+            <img src="<?php echo $imgPath; ?>" alt="Profile">
+            <span><?php echo htmlspecialchars($username); ?></span>
+        </a>
+    </div>
+</div>
+
+<div class="main-content">
+    <h2>👋 Welcome, <?php echo htmlspecialchars($username); ?>!</h2>
     <h3>🏢 Select a Company</h3>
+
     <div class="grid">
         <?php foreach ($companies as $company): ?>
-            <a href="rounds.php?company_id=<?= $company['id'] ?>">
+            <a href="rounds.php?company_id=<?= $company['id'] ?>" style="text-decoration:none; color:inherit;">
                 <div class="card">
                     <h3><?= htmlspecialchars($company['name']) ?></h3>
                 </div>
             </a>
         <?php endforeach; ?>
     </div>
+</div>
+
+<script>
+    function toggleMenu() {
+        document.getElementById("mobileMenu").classList.toggle("show");
+    }
+</script>
+
 </body>
 </html>
