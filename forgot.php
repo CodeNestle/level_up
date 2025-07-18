@@ -79,6 +79,8 @@ if (isset($_POST['verify_otp'])) {
     <meta charset="UTF-8">
     <title>Forgot Password</title>
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+        <link rel="icon" href="images/LuLogo.jpeg">
+
     <script>
         (function() {
             emailjs.init("q6GhHFc-ur5wXCKZx");
@@ -129,6 +131,75 @@ if (isset($_POST['verify_otp'])) {
         };
     </script>
 </head>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #e0f7fa, #ffffff);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        margin: 0;
+    }
+
+    h2 {
+        color: #006064;
+        margin-bottom: 20px;
+    }
+
+    form {
+        background: #ffffff;
+        padding: 25px 30px;
+        border-radius: 15px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        margin: 10px 0;
+        min-width: 300px;
+        max-width: 350px;
+    }
+
+    input[type="email"],
+    input[type="text"] {
+        width: 100%;
+        padding: 12px 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        font-size: 16px;
+    }
+
+    button {
+        background-color: #00796b;
+        color: white;
+        padding: 10px 15px;
+        font-size: 16px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        width: 100%;
+    }
+
+    button:hover {
+        background-color: #004d40;
+    }
+
+    #timerText {
+        text-align: center;
+        margin-top: 10px;
+        color: #888;
+    }
+
+    p[style*="color:red"] {
+        color: #c62828 !important;
+        background: #ffcdd2;
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+</style>
+
 <body>
     <h2>🔐 Forgot Password</h2>
     <?php if ($error) echo "<p style='color:red;'>$error</p>"; ?>
