@@ -79,6 +79,8 @@ if (!$question) {
 <html>
 <head>
     <title>Quiz</title>
+        <link rel="icon" href="images/LuLogo.jpeg">
+
     <style>
         body {
             font-family: sans-serif;
