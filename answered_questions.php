@@ -41,6 +41,8 @@ $result = $stmt->get_result();
 <html>
 <head>
     <title>Answered Questions</title>
+        <link rel="icon" href="images/LuLogo.jpeg">
+
     <style>
         body {
             font-family: sans-serif;
