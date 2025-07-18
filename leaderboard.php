@@ -1,160 +1,127 @@
 <?php
-session_start();
-include 'db.php';
+include("db.php");
 
-if (!isset($_SESSION['email'])) {
-    echo "<script>alert('❌ Please login first'); window.location='index.php';</script>";
-    exit();
-}
-
-$email = $_SESSION['email'];
-
-// Get logged-in user ID and username
-$stmt = $conn->prepare("SELECT id, username FROM users WHERE email = ?");
-$stmt->bind_param("s", $email);
-$stmt->execute();
-$stmt->bind_result($user_id, $username);
-$stmt->fetch();
-$stmt->close();
-
-// Get all XP entries for 'LevelUp Ooda Questions'
-$sql = "
-    SELECT ux.user_id, u.username, SUM(ux.xp_points) AS total_xp
-    FROM user_xp ux
-    JOIN users u ON ux.user_id = u.id
-    JOIN rounds r ON ux.round_id = r.id
-    WHERE r.round_name = 'LevelUp Ooda Questions'
-    GROUP BY ux.user_id
+$result = $conn->query("
+    SELECT u.id, u.username, u.profile_img, 
+           IFNULL(SUM(x.xp_points), 0) AS total_xp
+    FROM users u
+    LEFT JOIN user_xp x ON u.id = x.user_id
+    LEFT JOIN rounds r ON x.round_id = r.id
+    WHERE r.round_name LIKE '%LevelUp%' OR r.round_name IS NULL
+    GROUP BY u.id, u.username, u.profile_img
     ORDER BY total_xp DESC
-";
-$result = $conn->query($sql);
-
-// Build full leaderboard array
-$leaderboard = [];
-$logged_user_rank = null;
-$rank = 1;
-
-while ($row = $result->fetch_assoc()) {
-    $row['rank'] = $rank;
-    $leaderboard[] = $row;
-
-    if ($row['user_id'] == $user_id) {
-        $logged_user_rank = $rank;
-    }
-
-    $rank++;
-}
-
-// Slice Top 10
-$top10 = array_slice($leaderboard, 0, 10);
+");
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>🏆 Leaderboard - LevelUp Ooda Questions</title>
+    <title>Leaderboard</title>
     <style>
-        body { font-family: sans-serif; background: #f5f5f5; padding: 30px; text-align: center; }
-        h2 { margin-bottom: 20px; }
-        table {
-            margin: auto;
-            border-collapse: collapse;
-            width: 80%;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f0f0;
+            padding: 20px;
         }
+
+        h2 {
+            text-align: center;
+        }
+
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
         th, td {
             padding: 12px;
-            border: 1px solid #ddd;
+            text-align: left;
         }
-        th { background: #007bff; color: white; }
-        .highlight { background-color: #ffefb0; font-weight: bold; }
-        .back-btn {
-            margin-top: 20px;
-            display: inline-block;
-            text-decoration: none;
-            color: #007bff;
+
+        th {
+            background: #007bff;
+            color: white;
         }
-        .search-box {
-            margin-bottom: 20px;
+
+        tr:nth-child(even) {
+            background: #f9f9f9;
         }
-        #search-result {
-            background: white;
-            border: 1px solid #ccc;
-            padding: 20px;
-            width: 60%;
-            margin: 20px auto;
+
+        tr:hover {
+            background: #e9f5ff;
+            cursor: pointer;
+        }
+
+        .profile-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
+        /* Popup */
+        #popup {
             display: none;
+            position: fixed;
+            top: 10%;
+            left: 25%;
+            width: 50%;
+            background: #fff;
+            border: 2px solid #007bff;
+            padding: 20px;
+            z-index: 1000;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
             border-radius: 10px;
+        }
+
+        #popup-close {
+            float: right;
+            font-weight: bold;
+            font-size: 20px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <h2>🏆 LevelUp Leaderboard</h2>
+<h2>📋 Overall LevelUp Leaderboard</h2>
 
-    <div class="search-box">
-        <input type="text" id="searchUser" placeholder="🔍 Search username..." />
-        <button onclick="searchUser()">Search</button>
-    </div>
-
-    <table>
-        <tr>
-            <th>🏅 Rank</th>
-            <th>👤 Username</th>
-            <th>⚡ XP Points</th>
+<table>
+    <tr>
+        <th>Username</th>
+        <th>XP Points</th>
+    </tr>
+    <?php while ($row = $result->fetch_assoc()) { ?>
+        <tr onclick="showUserPopup(<?php echo $row['id']; ?>)">
+            <td>
+                <img src="images/<?php echo htmlspecialchars($row['profile_img']); ?>" class="profile-img">
+                <?php echo htmlspecialchars($row['username']); ?>
+            </td>
+            <td><?php echo $row['total_xp']; ?> XP</td>
         </tr>
+    <?php } ?>
+</table>
 
-        <?php foreach ($top10 as $row): ?>
-            <tr class="<?= $row['user_id'] == $user_id ? 'highlight' : '' ?>">
-                <td><?= $row['rank'] ?></td>
-                <td><?= htmlspecialchars($row['username']) ?></td>
-                <td><?= $row['total_xp'] ?></td>
-            </tr>
-        <?php endforeach; ?>
+<!-- Popup -->
+<div id="popup">
+    <span id="popup-close" onclick="document.getElementById('popup').style.display='none'">&times;</span>
+    <div id="popup-content"></div>
+</div>
 
-        <?php if ($logged_user_rank > 10): ?>
-            <tr class="highlight">
-                <td><?= $logged_user_rank ?></td>
-                <td><?= htmlspecialchars($username) ?></td>
-                <td>
-                    <?php
-                    $stmt = $conn->prepare("
-                        SELECT SUM(ux.xp_points)
-                        FROM user_xp ux
-                        JOIN rounds r ON ux.round_id = r.id
-                        WHERE ux.user_id = ? AND r.round_name = 'LevelUp Ooda Questions'
-                    ");
-                    $stmt->bind_param("i", $user_id);
-                    $stmt->execute();
-                    $stmt->bind_result($user_xp);
-                    $stmt->fetch();
-                    $stmt->close();
+<script>
+function showUserPopup(userId) {
+    fetch('search_user_xp.php?user_id=' + userId)
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById('popup-content').innerHTML = html;
+            document.getElementById('popup').style.display = 'block';
+        });
+}
+</script>
 
-                    echo $user_xp ?: 0;
-                    ?>
-                </td>
-            </tr>
-        <?php endif; ?>
-    </table>
-
-    <div id="search-result"></div>
-
-    <a href="dashboard.php" class="back-btn">← Back to Dashboard</a>
-
-    <script>
-        function searchUser() {
-            const username = document.getElementById("searchUser").value;
-            if (!username.trim()) return;
-
-            fetch(`search_user_xp.php?username=${encodeURIComponent(username)}`)
-                .then(res => res.text())
-                .then(html => {
-                    document.getElementById("search-result").innerHTML = html;
-                    document.getElementById("search-result").style.display = 'block';
-                });
-        }
-    </script>
 </body>
 </html>
