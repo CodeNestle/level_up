@@ -44,28 +44,131 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Login - LevelUp</title>
+    <link rel="icon" href="images/LuLogo.jpeg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+
+        .login-container {
+            background-color: #2d2d44;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 24px;
+            color: #00ffc3;
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        form input[type="email"],
+        form input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background-color: #44445e;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        form input[type="checkbox"] {
+            margin-right: 6px;
+        }
+
+        .remember-me {
+            margin-bottom: 20px;
+        }
+
+        form button {
+            width: 100%;
+            padding: 12px;
+            background-color: #00ffc3;
+            color: black;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        form button:hover {
+            background-color: #00cfa0;
+        }
+
+        .links {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .links a {
+            color: #00ffc3;
+            text-decoration: none;
+        }
+
+        .error {
+            background-color: #ff4e4e;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: white;
+        }
+    </style>
 </head>
 <body>
-    <h2>🔐 Login</h2>
-    <?php if (isset($error)) echo "<p style='color:red;'>$error</p>"; ?>
+    <div class="login-container">
+        <h2>🔐 Login to LevelUp</h2>
 
-    <form method="POST">
-        <label>Email:</label><br>
-        <input type="email" name="email" required><br><br>
+        <?php if (isset($error)) echo "<div class='error'>$error</div>"; ?>
 
-        <label>Password:</label><br>
-        <input type="password" name="password" required><br><br>
+        <form method="POST">
+            <label for="email">📧 Email</label>
+            <input type="email" name="email" id="email" required>
 
-        <input type="checkbox" name="remember" id="remember">
-        <label for="remember">Remember Me</label><br><br>
+            <label for="password">🔑 Password</label>
+            <input type="password" name="password" id="password" required>
 
-        don't account register here <a href="register.php">click</a>
-        forgot in your password <a href="forgot.php">click here</a>
+            <div class="remember-me">
+                <input type="checkbox" name="remember" id="remember">
+                <label for="remember">Remember Me</label>
+            </div>
 
-        <button type="submit">Login</button>
-    </form>
+            <button type="submit">Login</button>
+
+            <div class="links">
+                <p>🆕 Don't have an account? <a href="register.php">Register here</a></p>
+                <p>❓Forgot your password? <a href="forgot.php">Reset here</a></p>
+            </div>
+        </form>
+    </div>
 </body>
 </html>
