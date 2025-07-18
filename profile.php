@@ -58,104 +58,156 @@ $imgPath = $profile_img ? "images/$profile_img" : "images/default.png";
 
 <head>
     <title>Profile</title>
-        <link rel="icon" href="images/LuLogo.jpeg">
+<style>
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background: #f4f6f9;
+        margin: 0;
+        padding: 40px;
+        display: flex;
+        justify-content: center;
+    }
 
-    <style>
-        body {
-            font-family: sans-serif;
-            background-color: #eef1f4;
-            padding: 40px;
-            text-align: center;
-        }
+    .profile-card {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 600px;
+    }
 
-        .profile-card {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            display: inline-block;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            max-width: 800px;
-        }
+    .profile-card img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #4CAF50;
+        margin-bottom: 20px;
+    }
 
-        .profile-card img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 15px;
-        }
+    .form-group {
+        margin: 20px 0;
+        text-align: left;
+    }
 
-        .form-group {
-            margin: 15px 0;
-            text-align: left;
-        }
+    .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+        color: #333;
+    }
 
-        input[type="text"],
-        input[type="file"] {
-            width: 100%;
-            padding: 8px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
+    input[type="text"],
+    input[type="file"] {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        transition: border-color 0.3s;
+        font-size: 15px;
+    }
 
-        .save-btn {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #2ecc71;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-        }
+    input[type="text"]:focus,
+    input[type="file"]:focus {
+        border-color: #4CAF50;
+        outline: none;
+    }
 
-        .logout-btn {
-            margin-top: 25px;
-            padding: 10px 20px;
-            background-color: #f44336;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-        }
+    .save-btn {
+        background: #4CAF50;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.3s;
+        width: 100%;
+        margin-top: 15px;
+    }
 
-        .back-btn {
-            margin-top: 10px;
-            display: inline-block;
-            text-decoration: none;
-            color: #007bff;
-        }
+    .save-btn:hover {
+        background: #45a049;
+    }
 
-        table {
-            margin: 20px auto;
-            border-collapse: collapse;
-            width: 90%;
-        }
+    .logout-btn {
+        background: #f44336;
+        color: white;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        cursor: pointer;
+        margin-top: 25px;
+        transition: background 0.3s;
+        width: 100%;
+    }
 
-        th,
-        td {
-            padding: 10px;
-            border: 1px solid #ccc;
-        }
+    .logout-btn:hover {
+        background: #e53935;
+    }
 
-        th {
-            background: #f0f0f0;
-        }
+    .back-btn {
+        display: block;
+        margin-top: 20px;
+        color: #3498db;
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 500;
+    }
 
-        .answered-list ul {
-            list-style-type: none;
-            padding: 0;
-        }
+    .back-btn:hover {
+        text-decoration: underline;
+    }
 
-        .answered-list li {
-            margin: 8px 0;
-        }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 30px;
+        font-size: 15px;
+    }
 
-        .answered-list a {
-            text-decoration: none;
-            color: #34495e;
-            font-weight: 500;
-        }
-    </style>
+    th, td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    th {
+        background-color: #f8f8f8;
+        font-weight: 600;
+    }
+
+    .answered-list {
+        margin-top: 30px;
+        text-align: left;
+    }
+
+    .answered-list h3 {
+        margin-bottom: 15px;
+    }
+
+    .answered-list ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .answered-list li {
+        margin-bottom: 8px;
+    }
+
+    .answered-list a {
+        color: #2c3e50;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .answered-list a:hover {
+        text-decoration: underline;
+    }
+</style>
+
 </head>
 
 <body>
