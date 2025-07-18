@@ -45,6 +45,7 @@ $stmt->close();
 <html>
 <head>
     <title><?= htmlspecialchars($company_name) ?> - Rounds</title>
+    <link rel="icon" href="images/LuLogo.jpeg">
     <style>
         body { font-family: sans-serif; padding: 30px; background: #f2f2f2; }
         .card {
