@@ -58,6 +58,8 @@ $imgPath = $profile_img ? "images/$profile_img" : "images/default.png";
 
 <head>
     <title>Profile</title>
+        <link rel="icon" href="images/LuLogo.jpeg">
+
     <style>
         body {
             font-family: sans-serif;
