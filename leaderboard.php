@@ -17,6 +17,8 @@ $result = $conn->query("
 <html>
 <head>
     <title>Leaderboard</title>
+        <link rel="icon" href="images/LuLogo.jpeg">
+
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
