@@ -1,68 +1,64 @@
 <?php
-include 'db.php';
+include("db.php");
 
-$username = $_GET['username'] ?? '';
-$username = trim($username);
-
-if (!$username) {
-    echo "<p>❌ Invalid search.</p>";
-    exit();
+if (!isset($_GET['user_id'])) {
+    echo "Invalid request.";
+    exit;
 }
 
-// Get user ID and name
-$stmt = $conn->prepare("SELECT id, username FROM users WHERE username LIKE ?");
-$like = "%" . $username . "%";
-$stmt->bind_param("s", $like);
-$stmt->execute();
-$result = $stmt->get_result();
+$user_id = (int) $_GET['user_id'];
 
-if ($result->num_rows === 0) {
-    echo "<p>❌ User not found.</p>";
-    exit();
-}
+// Get user details
+$user_result = $conn->query("SELECT username, profile_img FROM users WHERE id = $user_id");
+$user = $user_result->fetch_assoc();
 
-while ($user = $result->fetch_assoc()) {
-    $user_id = $user['id'];
-    $user_name = $user['username'];
+// Get total XP
+$total_result = $conn->query("SELECT IFNULL(SUM(xp_points), 0) AS total_xp FROM user_xp WHERE user_id = $user_id");
+$total = $total_result->fetch_assoc();
 
-    echo "<h3>👤 {$user_name}'s XP Details</h3>";
+// Breakdown query with safe aliases
+$xp_query = $conn->query("
+    SELECT comp.name AS company_name, r.round_name, SUM(ux.xp_points) AS round_xp
+    FROM user_xp ux
+    JOIN rounds r ON ux.round_id = r.id
+    JOIN companies comp ON r.company_id = comp.id
+    WHERE ux.user_id = $user_id
+    GROUP BY comp.name, r.round_name
+    ORDER BY comp.name, r.round_name
+");
 
-    // LevelUp total XP
-    $stmt2 = $conn->prepare("
-        SELECT SUM(ux.xp_points)
-        FROM user_xp ux
-        JOIN rounds r ON ux.round_id = r.id
-        WHERE ux.user_id = ? AND r.round_name = 'LevelUp Ooda Questions'
-    ");
-    $stmt2->bind_param("i", $user_id);
-    $stmt2->execute();
-    $stmt2->bind_result($levelup_xp);
-    $stmt2->fetch();
-    $stmt2->close();
+$xp_data = [];
+while ($row = $xp_query->fetch_assoc()) {
+    $company = $row['company_name'];
+    $round = $row['round_name'];
+    $points = $row['round_xp'];
 
-    echo "<p>🌟 LevelUp Ooda Questions XP: <strong>" . ($levelup_xp ?: 0) . "</strong></p>";
-
-    // Detailed company/round XP
-    $stmt3 = $conn->prepare("
-        SELECT c.name AS company, r.round_name, ux.xp_points
-        FROM user_xp ux
-        JOIN rounds r ON ux.round_id = r.id
-        JOIN companies c ON ux.company_id = c.id
-        WHERE ux.user_id = ? AND r.round_name != 'LevelUp Ooda Questions'
-        ORDER BY c.name, r.round_name
-    ");
-    $stmt3->bind_param("i", $user_id);
-    $stmt3->execute();
-    $res3 = $stmt3->get_result();
-
-    if ($res3->num_rows > 0) {
-        echo "<table><tr><th>🏢 Company</th><th>🧩 Round</th><th>⚡ XP</th></tr>";
-        while ($row = $res3->fetch_assoc()) {
-            echo "<tr><td>{$row['company']}</td><td>{$row['round_name']}</td><td>{$row['xp_points']}</td></tr>";
-        }
-        echo "</table>";
-    } else {
-        echo "<p>📭 No company round XP yet.</p>";
+    if (!isset($xp_data[$company])) {
+        $xp_data[$company] = [];
     }
+    $xp_data[$company][$round] = $points;
 }
 ?>
+
+<div style="text-align: center;">
+    <img src="images/<?php echo htmlspecialchars($user['profile_img']); ?>" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 10px;">
+    <h2><?php echo htmlspecialchars($user['username']); ?></h2>
+    <h3>🔥 Total XP: <?php echo $total['total_xp']; ?></h3>
+</div>
+
+<hr>
+
+<div style="text-align: left;">
+    <?php if (count($xp_data) === 0): ?>
+        <p style="text-align:center;">No XP records yet.</p>
+    <?php else: ?>
+        <?php foreach ($xp_data as $company => $rounds): ?>
+            <h4 style="color: #007bff;">🏢 <?php echo htmlspecialchars($company); ?></h4>
+            <ul>
+                <?php foreach ($rounds as $round => $xp): ?>
+                    <li>📘 <?php echo htmlspecialchars($round); ?> — <strong><?php echo $xp; ?> XP</strong></li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endforeach; ?>
+    <?php endif; ?>
+</div>
